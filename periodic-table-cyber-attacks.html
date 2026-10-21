@@ -1,0 +1,352 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>The Periodic Table of Cyber Attacks</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Bricolage+Grotesque:opsz,wght@12..96,400;12..96,600;12..96,800&family=Atkinson+Hyperlegible:ital,wght@0,400;0,700;1,400&display=swap" rel="stylesheet">
+<style>
+:root{
+  box-sizing:border-box;
+  padding-top:env(safe-area-inset-top,0px);
+  padding-bottom:env(safe-area-inset-bottom,0px);
+  --bg:#E4EAEE; --paper:#EEF2F5; --ink:#15283A; --muted:#536575; --rule:#BFCBD4;
+  --tile-s:52%; --tile-l:83%; --tile-ink:#15283A; --focus:#1D5FD1;
+  --display:"Bricolage Grotesque", "Arial Narrow", system-ui, sans-serif;
+  --body:"Atkinson Hyperlegible", "Segoe UI", system-ui, sans-serif;
+}
+@media (prefers-color-scheme: dark){
+  :root:not([data-theme="light"]){
+    --bg:#0F1A24; --paper:#162432; --ink:#E3EBF1; --muted:#97A8B6; --rule:#2C3E4E;
+    --tile-s:34%; --tile-l:27%; --tile-ink:#EEF3F7; --focus:#7FB0FF;
+  }
+}
+:root[data-theme="dark"]{
+  --bg:#0F1A24; --paper:#162432; --ink:#E3EBF1; --muted:#97A8B6; --rule:#2C3E4E;
+  --tile-s:34%; --tile-l:27%; --tile-ink:#EEF3F7; --focus:#7FB0FF;
+}
+*,*::before,*::after{box-sizing:inherit}
+html{scroll-padding-top:env(safe-area-inset-top,0px)}
+body{margin:0;background:var(--bg);color:var(--ink);font-family:var(--body);font-size:16px;line-height:1.5}
+.wrap{max-width:1180px;margin:0 auto;padding:2.5rem 1.25rem 3rem}
+
+header{display:flex;flex-wrap:wrap;align-items:flex-end;justify-content:space-between;gap:1rem 2rem;margin-bottom:1.75rem}
+h1{font-family:var(--display);font-weight:800;font-size:clamp(2rem,4.6vw,3.4rem);line-height:.95;letter-spacing:-.02em;margin:0;max-width:14ch}
+.lede{color:var(--muted);max-width:46ch;margin:.75rem 0 0}
+.controls{display:flex;flex-direction:column;gap:.6rem;align-items:flex-start}
+.seg{display:inline-flex;border:1.5px solid var(--ink);border-radius:999px;overflow:hidden}
+.seg button{font:inherit;font-size:.9rem;background:transparent;color:var(--ink);border:0;padding:.4rem .9rem;cursor:pointer}
+.seg button[aria-pressed="true"]{background:var(--ink);color:var(--bg)}
+.search{font:inherit;font-size:.95rem;background:var(--paper);color:var(--ink);border:1.5px solid var(--rule);border-radius:8px;padding:.45rem .7rem;width:15rem;max-width:100%}
+.search::placeholder{color:var(--muted)}
+button:focus-visible,.search:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+
+.scroller{overflow-x:auto;padding:.25rem .25rem 1rem;margin:0 -.25rem}
+.table{
+  --cell:minmax(76px,1fr);
+  display:grid;grid-template-columns:repeat(9,var(--cell));gap:5px;min-width:740px;
+}
+.colhead{font-size:.72rem;line-height:1.2;color:var(--muted);align-self:end;padding:0 2px 4px;border-bottom:3px solid hsl(var(--h) 55% 50%);min-height:2.6em}
+.tile{
+  position:relative;aspect-ratio:1/1.08;border:0;border-radius:6px;padding:6px 7px;text-align:left;cursor:pointer;
+  background:hsl(var(--h) var(--tile-s) var(--tile-l));color:var(--tile-ink);font-family:var(--body);
+  display:flex;flex-direction:column;justify-content:space-between;
+  transition:opacity .18s, transform .12s, box-shadow .12s;
+}
+.tile:hover{transform:translateY(-2px);box-shadow:0 0 0 2px var(--ink)}
+.tile[aria-pressed="true"]{box-shadow:0 0 0 3px var(--ink)}
+.tile .num{font-size:.68rem;opacity:.75}
+.tile .sym{font-family:var(--display);font-weight:800;font-size:clamp(1.5rem,2.6vw,2.1rem);line-height:1;letter-spacing:-.02em}
+.tile .nm{font-size:.66rem;line-height:1.15;min-height:2.3em}
+.dots{position:absolute;top:7px;right:7px;display:flex;gap:2px}
+.dots i{width:4px;height:4px;border-radius:50%;background:currentColor;opacity:.22}
+.dots i.on{opacity:.85}
+.table.dim .tile:not(.match){opacity:.18}
+
+/* sophistication colouring */
+.by-level .tile{background:var(--lv)}
+.by-level .colhead{border-bottom-color:var(--rule)}
+
+.inset{grid-column:3 / 8;grid-row:2 / 4;background:var(--paper);border:1.5px solid var(--rule);border-radius:8px;padding:12px 14px;display:flex;gap:14px;overflow:auto}
+.big{flex:0 0 auto;width:104px;height:112px;border-radius:6px;background:hsl(var(--h) var(--tile-s) var(--tile-l));color:var(--tile-ink);padding:7px 9px;display:flex;flex-direction:column;justify-content:space-between}
+.by-level .big{background:var(--lv)}
+.big .sym{font-family:var(--display);font-weight:800;font-size:2.8rem;line-height:1}
+.big .num{font-size:.75rem;opacity:.75}
+.big .lvl{font-size:.7rem}
+.info{min-width:0;font-size:.83rem;line-height:1.4}
+.info h2{font-family:var(--display);font-weight:600;font-size:1.25rem;line-height:1.1;margin:0 0 .15rem}
+.info .cat{color:var(--muted);margin:0 0 .4rem}
+.info p{margin:0 0 .3rem}
+.info b{font-weight:700}
+.info .ref{color:var(--muted);font-size:.75rem}
+.scope{display:inline-block;font-size:.72rem;padding:1px 7px;border-radius:999px;border:1px solid var(--rule)}
+.s-eu{background:hsl(220 60% 50% / .15);border-color:hsl(220 60% 50% / .45)}
+.s-eu-res{background:hsl(160 50% 45% / .15);border-color:hsl(160 50% 45% / .45)}
+.info a{color:inherit;text-underline-offset:2px}
+.info a:focus-visible{outline:3px solid var(--focus);outline-offset:2px}
+.hint{color:var(--muted);font-size:.9rem;align-self:center}
+
+.gap{grid-column:1 / -1;height:14px}
+.rowlabel{font-size:.72rem;line-height:1.25;color:var(--muted);align-self:center;padding-right:4px;text-align:right}
+
+.below{display:none;margin-top:1rem}
+.below .inset{display:flex}
+
+.legend{display:flex;flex-wrap:wrap;gap:.4rem .5rem;margin-top:1.4rem}
+.legend button{font:inherit;font-size:.82rem;display:inline-flex;align-items:center;gap:.4rem;background:transparent;color:var(--ink);border:1.5px solid var(--rule);border-radius:999px;padding:.25rem .7rem .25rem .45rem;cursor:pointer}
+.legend button[aria-pressed="true"]{border-color:var(--ink)}
+.legend .sw{width:12px;height:12px;border-radius:3px;background:hsl(var(--h) 55% 55%)}
+.scale{display:none;align-items:center;gap:.5rem;margin-top:1.4rem;font-size:.82rem;color:var(--muted)}
+.by-level-on .scale{display:flex}
+.by-level-on .legend{display:none}
+.scale .bar{display:flex;gap:3px}
+.scale .bar span{width:38px;height:14px;border-radius:3px}
+
+footer{margin-top:2.25rem;padding-top:1rem;border-top:1.5px solid var(--rule);color:var(--muted);font-size:.85rem;max-width:72ch}
+footer p{margin:0 0 .5rem}
+
+@media (max-width:820px){
+  .table .inset{display:none}
+  .below{display:block}
+}
+@media (prefers-reduced-motion:reduce){.tile{transition:none}.tile:hover{transform:none}}
+</style>
+</head>
+<body>
+<div class="wrap" id="app">
+  <header>
+    <div>
+      <h1>The Periodic Table of Cyber Attacks</h1>
+      <p class="lede">65 attack techniques grouped into families. Within each column, techniques get more sophisticated as you go down. Select any element for what it is, a sourced European case, and how to defend against it.</p>
+    </div>
+    <div class="controls">
+      <div class="seg" role="group" aria-label="Colour tiles by">
+        <button type="button" data-mode="family" aria-pressed="true">Colour by family</button>
+        <button type="button" data-mode="level" aria-pressed="false">By sophistication</button>
+      </div>
+      <input class="search" type="search" placeholder="Find an attack, e.g. ransomware" aria-label="Find an attack">
+    </div>
+  </header>
+
+  <div class="scroller">
+    <div class="table" id="table"></div>
+  </div>
+  <div class="below" id="below"></div>
+
+  <div class="legend" id="legend" aria-label="Filter by family"></div>
+  <div class="scale" aria-hidden="true">
+    <span>Opportunistic</span>
+    <div class="bar" id="scalebar"></div>
+    <span>State-level</span>
+  </div>
+
+  <footer>
+    <p>Sophistication runs from 1 (automated, cheap, widely available tooling) to 5 (custom capability, typically criminal groups with deep resources or state actors). It's a rough editorial scale, not a formal standard.</p>
+    <p>References point to MITRE ATT&amp;CK technique IDs (T…), MITRE ATLAS for AI attacks (AML.T…), and CWE weakness IDs for web flaws. Cases come from public reporting and link to the page they were taken from. 48 are incidents in Europe, 11 are European research or disclosures, and 6 use a global case because no well-documented European incident turned up.</p>
+  </footer>
+</div>
+
+<script>
+const FAM = {
+  soc:{n:"Social engineering",h:12},
+  cred:{n:"Credentials & identity",h:42},
+  mal:{n:"Malware",h:350},
+  web:{n:"Web applications",h:268},
+  net:{n:"Network",h:200},
+  sup:{n:"Supply chain & cloud",h:172},
+  imp:{n:"Impact",h:0},
+  lat:{n:"Lateral movement & persistence",h:228},
+  adv:{n:"Advanced & state-level",h:300},
+  ai:{n:"AI & machine learning",h:142},
+  phy:{n:"Physical & proximity",h:30}
+};
+// columns of the main table, top to bottom (least to most sophisticated)
+const D = {
+soc:[
+ ["Ph","Phishing",1,"Mass emails that trick people into clicking a link, opening a file or entering credentials.","2019: two phishing emails opened at Maastricht University led to a Clop ransomware attack that December; the university paid about €200,000.","Phishing-resistant MFA, link and attachment filtering, an easy report button.","T1566","https://grahamcluley.com/dutch-university-ransomware/","eu"],
+ ["Sm","Smishing",1,"Phishing over SMS or messaging apps, often posing as a delivery firm or bank.","2021–2022: FluBot spread across Europe through fake delivery and voicemail texts until Dutch police took over its infrastructure in a Europol-coordinated operation.","Mobile filtering, staff awareness, never trusting login links in texts.","T1660","https://www.securityweek.com/europol-announces-takedown-flubot-mobile-spyware","eu"],
+ ["Vi","Vishing",2,"Voice calls impersonating IT, a bank or a colleague to extract access or money.","2025: attackers posing as staff talked Marks & Spencer's outsourced help desk into resetting credentials, leading to ransomware and an estimated £300 million profit hit.","Help desk identity verification, call-back procedures.","T1566.004","https://www.blackfog.com/marks-and-spencer-ransomware-attack/","eu"],
+ ["Pt","Pretexting",2,"A fabricated story or identity used to make a target hand over information or money.","2020: Dutch 'friend in need' WhatsApp fraud, where scammers pose as a child with a new number, produced 9,605 reports and €3.3 million in losses at the Fraudehelpdesk.","Verification procedures for sensitive requests, call back on a known number.","T1598","https://id.nl/huis-en-entertainment/computer-en-gaming/software/dit-jaar-al-33-miljoen-euro-buitgemaakt-bij-whatsapp-fraude","eu"],
+ ["Sp","Spear phishing",3,"Phishing tailored to one person or team using researched personal details.","2015: Bundestag members received fake UN news emails; APT28 malware then spread through the German parliament's network and stole over 16 GB.","Phishing-resistant MFA, sandboxing, targeted training for high-risk roles.","T1566.001","https://cyberlaw.ccdcoe.org/wiki/Bundestag_Hack_(2015)","eu"],
+ ["Be","CEO fraud / BEC",3,"Impersonating an executive or supplier by email to redirect payments.","2016: Belgian bank Crelan lost about €70 million after fraudsters impersonated its CEO by email.","Dual approval for payments, out-of-band confirmation of bank detail changes.","T1656","https://brf.be/national/957775","eu"],
+ ["Df","Deepfake impersonation",4,"AI-generated voice or video of a trusted person used to authorise actions.","2019: the CEO of a UK energy firm wired €220,000 after a call that used an AI-cloned voice of his German parent company's chief executive.","Code words, call-back verification, payment limits regardless of who asks.","T1656","https://www.cisomag.com/deepfake-voice-attack/","eu"]
+],
+cred:[
+ ["Bf","Brute force",1,"Automated guessing of passwords against a login service.","2020: APT28 brute-forced email accounts at Norway's parliament, the Storting, and stole content from some lawmakers' mailboxes.","Lockout and rate limiting, MFA, no weak passwords on internet-facing services.","T1110.001","https://cyberscoop.com/norwegian-police-implicate-fancy-bear-in-parliament-hack-describe-brute-forcing-of-email-accounts/","eu"],
+ ["Cs","Credential stuffing",1,"Replaying username and password pairs leaked from other breaches.","2018: about 1,000 Great Western Railway customer accounts were accessed with passwords reused from other breaches.","MFA, breached-password checks, bot detection.","T1110.004","https://www.theregister.com/2018/04/11/great_western_rail_password_reset/","eu"],
+ ["Ps","Password spraying",2,"Trying a few common passwords across many accounts to avoid lockouts.","2021: the UK NCSC warned of a rise in password-spraying campaigns against UK organisations by the actor Microsoft tracks as NOBELIUM.","Ban common passwords, MFA everywhere, monitor failed logins across accounts.","T1110.003","https://www.ncsc.gov.uk/news/microsoft-update-brute-force-password-spraying","eu"],
+ ["Mf","MFA fatigue",2,"Flooding a user with push prompts until they approve one.","2022: Uber was breached after a contractor accepted one of a flood of push prompts.","Number matching, phishing-resistant MFA, rate limits on prompts.","T1621","https://www.csoonline.com/article/573699/multi-factor-authentication-fatigue-attacks-are-on-the-rise-how-to-defend-against-them.html","global"],
+ ["Ao","Token phishing",3,"Tricking users into approving a sign-in or app consent so the attacker receives valid access tokens.","Since 2024: Russia-aligned Storm-2372 used fake Teams invites to trick government and NGO staff across Europe into device-code sign-ins, stealing their tokens.","Block device-code flow where unused, restrict user app consent, revoke sessions on suspicion.","T1528","https://cyberscoop.com/russia-threat-groups-device-code-phishing-microsoft-accounts/","eu"],
+ ["Sh","Session hijacking",3,"Stealing a valid session cookie or token to skip login and MFA entirely.","2020: CERT-EU warned EU institutions about Cookiethief, Android malware that stole social media session cookies to take over accounts.","Token binding, short session lifetimes, infostealer detection.","T1539","https://www.cert.europa.eu/publications/threat-intelligence/threat-memo-cookiethief-social-media-account-takeover/pdf","eu-res"]
+],
+mal:[
+ ["Tj","Trojan",2,"Malware disguised as legitimate software or a document.","2021: Dutch and German police led a Europol and Eurojust operation that took over Emotet, which began as a banking trojan in 2014.","Application allowlisting, macro blocking, EDR.","T1204.002","https://www.eurojust.europa.eu/worlds-most-dangerous-malware-emotet-disrupted-through-global-action","eu"],
+ ["Is","Infostealer",2,"Malware that harvests saved passwords, cookies and crypto wallets.","2024: Operation Magnus, led by Dutch police with arrests in Belgium, shut down the RedLine and META infostealers.","EDR, no password storage in browsers on shared devices, MFA.","T1555","https://nltimes.nl/node/76091","eu"],
+ ["Wm","Worm",3,"Self-spreading malware that moves between machines without user action.","2017: WannaCry affected at least 81 of England's 236 NHS trusts and cancelled thousands of appointments.","Patching, network segmentation, disable legacy protocols.","T1210","https://www.nao.org.uk/report/investigation-wannacry-cyber-attack-and-the-nhs/","eu"],
+ ["Fm","Fileless malware",4,"Code that runs in memory or via built-in tools, leaving little on disk.","2017: Kaspersky found PowerShell malware hidden in memory and the registry at over 140 banks and other organisations, including in France and the UK.","Script logging, PowerShell constrained language mode, behavioural EDR.","T1059.001","https://thehackernews.com/2017/02/fileless-malware-bank.html","eu"],
+ ["Rk","Rootkit",4,"Malware that hides deep in the operating system to stay invisible.","2014: German firm G Data exposed Uroburos, a rootkit in a long-running Russian espionage campaign against government networks.","Secure Boot, kernel integrity checks, reimage on compromise.","T1014","https://thehackernews.com/2014/03/sophisticated-russian-malware-snake-and.html","eu"]
+],
+web:[
+ ["Xs","Cross-site scripting",2,"Injecting script into a web page so it runs in other users' browsers.","2014: attackers planted script in listings on eBay's UK site that sent buyers to a fake login page.","Output encoding, Content Security Policy, framework auto-escaping.","CWE-79","https://www.bitdefender.com/blog/hotforsecurity/ebay-falls-victim-to-cross-site-scripting-attack/","eu"],
+ ["Sq","SQL injection",2,"Smuggling database commands through input fields.","2015: TalkTalk lost data on almost 157,000 customers through SQL injection and received a then-record £400,000 ICO fine.","Parameterised queries, least-privilege database accounts, WAF.","CWE-89","https://www.siliconrepublic.com/enterprise/talktalk-cyberattack-fine-ico","eu"],
+ ["Tr","Path traversal",2,"Using ../ style input to read or write files outside the intended folder.","2020: a Citrix path-traversal flaw (CVE-2019-19781) was the way in for ransomware at Düsseldorf University Hospital, which had to stop emergency admissions.","Input canonicalisation, patching edge devices fast.","CWE-22","https://www.theregister.com/2020/09/23/doppelpaymer_german_hospital_ransomware/","eu"],
+ ["Sr","Server-side request forgery",3,"Making a server fetch internal URLs on the attacker's behalf.","2021: ProxyLogon, a chain that starts with an SSRF flaw in Exchange, hit the European Banking Authority and the Czech labour ministry.","Egress allowlists, patch quickly, validate destination hosts.","CWE-918","https://therecord.media/attacks-on-exchange-servers-expand-from-nation-states-to-cryptominers/","eu"],
+ ["Rc","Remote code execution",4,"Input that makes a server run attacker-supplied code.","2021: attackers exploited Log4Shell at Belgium's Ministry of Defence; recovery cost about €2.25 million.","Patch management, SBOMs to find vulnerable components, WAF virtual patching.","CWE-917","https://brusselstimes.com/330043/december-2021-cyberattack-costs-defence-ministry-e2-25-million","eu"]
+],
+net:[
+ ["Sn","Interception",1,"Secretly capturing traffic or calls as they cross a network.","2004–2005: rogue software abused lawful-intercept features in Vodafone Greece's network to tap about 100 phones, including the prime minister's.","Encrypt everything end to end, monitor and audit intercept functions.","T1040","https://spectrum.ieee.org/the-athens-affair","eu"],
+ ["Dd","DDoS",2,"Overwhelming a service with traffic from many machines.","2021: a DDoS on Belnet cut connectivity for about 200 Belgian institutions and disrupted parliament committee meetings.","Upstream scrubbing, CDN, capacity planning, a DDoS runbook.","T1498","https://therecord.media/belgiums-government-network-goes-down-after-massive-ddos-attack","eu"],
+ ["Mi","Man-in-the-middle",3,"Sitting between two parties to read or alter their traffic.","2011: hackers breached Dutch certificate authority DigiNotar and used a fake Google certificate to intercept Gmail traffic of up to 300,000 users, mostly in Iran.","Certificate transparency monitoring, pinning, hardened CA operations.","T1557","https://www.theregister.com/2011/09/06/diginotar_audit_damning_fail/","eu"],
+ ["Dn","DNS hijacking",4,"Changing DNS records so traffic goes to attacker infrastructure.","2019: the Sea Turtle group breached ICS-Forth, which runs Greece's .gr domain, and hijacked DNS for Greek government bodies.","Registry lock, DNSSEC, MFA on registrar accounts, monitor records.","T1584.002","https://blog.talosintelligence.com/sea-turtle-keeps-on-swimming/","eu"],
+ ["Bg","BGP hijacking",5,"Announcing someone else's IP space to reroute internet traffic.","2020: Russia's Rostelecom announced over 8,800 routes belonging to networks such as Akamai, Cloudflare and Hetzner for about an hour; it may have been accidental.","RPKI route origin validation, route monitoring.","—","https://securityaffairs.com/101134/security/rostelecom-telco-hijacks-internet-traffic.html","eu"]
+],
+sup:[
+ ["Cm","Cloud misconfiguration",1,"Exploiting publicly exposed storage, consoles or keys in the cloud.","2018: French influencer agency Octoly left a public S3 bucket exposing data on over 12,000 people across Europe.","Posture management (CSPM), block public access by default.","T1530","https://cyberscoop.com/octoly-breach-amazon-web-services-upguard/","eu"],
+ ["Ty","Typosquatting",2,"Publishing malicious packages or domains with near-identical names.","2024: over 500 typosquatted packages forced PyPI to pause new sign-ups.","Dependency pinning, private registries, package reputation checks.","T1195.001","https://www.bleepingcomputer.com/news/security/pypi-suspends-new-user-registration-to-block-malware-campaign/","global"],
+ ["Dc","Dependency confusion",3,"Tricking build tools into fetching a public package instead of an internal one.","2021: researcher Alex Birsan reached internal systems at over 35 companies, including Apple and Microsoft, this way.","Scoped namespaces, registry priority rules, lockfiles.","T1195.001","https://www.bleepingcomputer.com/news/security/researcher-hacks-microsoft-apple-more-in-novel-supply-chain-attack/","global"],
+ ["Ce","Container escape",4,"Breaking out of a container to control the host.","2019: Polish researchers found runc flaw CVE-2019-5736, disclosed by a SUSE maintainer, which gave root on Docker and Kubernetes hosts.","Rootless containers, seccomp and AppArmor, patch runtimes.","T1611","https://www.helpnetsecurity.com/2019/02/12/runc-container-escape-flaw/","eu-res"],
+ ["Sw","Software supply chain",5,"Compromising a vendor's build or update process to reach its customers.","2021: REvil's attack through Kaseya's IT management software reached a Swedish supplier and closed most of Coop Sweden's 800 stores.","Vendor risk management, signed builds, monitoring of trusted software.","T1195.002","https://therecord.media/supermarket-chain-coop-closes-800-stores-following-kaseya-ransomware-attack/","eu"]
+],
+imp:[
+ ["Cj","Cryptojacking",1,"Using a victim's computing power to mine cryptocurrency.","2024: Ukrainian police, supported by Europol, arrested a man who hijacked cloud accounts to mine about $2 million in crypto.","Secure cloud consoles, MFA, cost and CPU anomaly alerts.","T1496","https://securityaffairs.com/157432/cyber-crime/mastermind-cryptojacking-scheme-arrested-ukraine.html","eu"],
+ ["De","Defacement",1,"Replacing a website's content, usually for propaganda.","2022: around 70 Ukrainian government websites were defaced with a 'be afraid' message weeks before the invasion.","Patch CMSs, file integrity monitoring.","T1491","https://threatpost.com/be-afraid-massive-cyberattack-downs-ukrainian-govt-sites/177659/","eu"],
+ ["Rw","Ransomware",3,"Encrypting systems and demanding payment for the key.","2020: ransomware stopped production for a week at Picanol's plants in Ypres, Romania and China.","Offline backups, segmentation, EDR, a tested recovery plan.","T1486","https://www.vrt.be/vrtnws/en/2020/01/15/cyber-attack-shuts-down-industrial-production-for-the-week/","eu"],
+ ["Ex","Data extortion",3,"Stealing data and threatening to publish it, with or without encryption.","2020: a hacker stole Finnish clinic Vastaamo's therapy notes and emailed patients demanding ransom; he was jailed in 2024.","Data minimisation, encryption at rest, breach detection and disclosure.","T1657","https://krebsonsecurity.com/2024/04/man-who-mass-extorted-psychotherapy-patients-gets-six-years/","eu"],
+ ["Wi","Wiper",5,"Destroying data permanently, sometimes disguised as ransomware.","2017: NotPetya forced Danish shipping firm Maersk to reinstall 4,000 servers and 45,000 PCs, costing up to $300 million.","Immutable offline backups, segmentation, rapid isolation.","T1561","https://scmagazine.com/news/notpetya-attack-totally-destroyed-maersks-computer-network-chairman","eu"]
+],
+lat:[
+ ["Ra","Remote tool abuse",2,"Using legitimate remote-control or pentest tools so attacker access looks like normal admin work.","2021: Conti affiliates used Cobalt Strike to move through Ireland's health service for eight weeks before deploying ransomware.","Allowlist approved tools, alert on new installs, set EDR to block not just log.","T1219","https://krebsonsecurity.com/2021/12/inside-irelands-public-healthcare-ransomware-scare/","eu"],
+ ["Cr","Credential reuse",3,"Dumping password hashes or credentials from memory and replaying them on other machines (pass-the-hash).","2017: NotPetya stole Windows credentials with a modified Mimikatz and reused them through PsExec and WMIC to spread inside victim networks.","Tiered admin model, LAPS, Credential Guard.","T1550.002","https://cisa.gov/ncas/alerts/TA17-181A","eu"],
+ ["Kb","Kerberoasting",3,"Requesting service tickets and cracking them offline for service account passwords.","2024: Kerberoasting was used in the ransomware attack on the US hospital system Ascension.","Long random service account passwords, gMSAs, AES-only Kerberos.","T1558.003","https://blog.cryptographyengineering.com/2025/09/10/kerberoasting/","global"],
+ ["Lo","Living off the land",4,"Using built-in admin tools so activity blends in with normal operations.","2022: Sandworm used a native SCADA program to trip substation breakers in Ukraine, causing an outage during missile strikes.","Command-line logging, behavioural baselines, restrict admin tools.","T1218","https://cloud.google.com/blog/topics/threat-intelligence/sandworm-disrupts-power-ukraine-operational-technology","eu"],
+ ["Gt","Golden ticket",5,"Forging Kerberos tickets with the domain's master key for unlimited access.","2022: Kaspersky reported a Chinese-speaking group forging Golden Tickets inside military-industrial and public bodies in Eastern Europe.","Protect domain controllers, rotate the krbtgt key twice after compromise.","T1558.001","https://www.semperis.com/blog/golden-ticket-attack-explained/","eu"],
+ ["Tf","Token forgery",5,"Minting valid cloud authentication tokens with a stolen signing key.","2023: China-based Storm-0558, which mainly targets Western European governments, forged tokens with a stolen Microsoft key to read email at about 25 organisations.","HSM-protected keys, key rotation, token validation logging.","T1606","https://www.securityweek.com/chinese-cyberspies-used-forged-authentication-tokens-to-hack-government-emails/","eu"]
+],
+adv:[
+ ["In","Insider threat",2,"Someone with legitimate access misusing it.","2023: former Tesla employees leaked 100 GB of internal data, affecting about 75,000 staff, to German newspaper Handelsblatt.","Least privilege, user behaviour analytics, offboarding discipline.","—","https://therecord.media/tesla-data-breach-insider-wrongdoing","eu"],
+ ["Wh","Watering hole",3,"Compromising a site the target group visits to infect them.","2016–2017: Lazarus-linked attackers rigged the Polish financial regulator's website to infect staff at visiting banks.","Browser isolation, patch browsers fast, EDR.","T1189","https://www.baesystems.com/en-uk/insight/lazarus---watering-hole-attacks","eu"],
+ ["Es","Cyber espionage campaign",4,"Long-term, stealthy intrusion to steal intelligence.","2010–2013: GCHQ's Operation Socialist hacked Belgacom (now Proximus), the first known case of one EU state hacking another's critical infrastructure.","Threat hunting, network detection, assume-breach exercises.","—","https://theintercept.com/2018/02/17/gchq-belgacom-investigation-europe-hack","eu"],
+ ["Zd","Zero-day exploit",5,"Exploiting a flaw the vendor doesn't know about yet.","2023: attackers used an Ivanti EPMM zero-day, first discovered in Norway, to breach a platform used by 12 Norwegian ministries.","Defence in depth, attack surface reduction, fast detection over prevention alone.","T1190","https://www.bleepingcomputer.com/news/security/norway-says-ivanti-zero-day-was-used-to-hack-govt-it-systems/","eu"],
+ ["Zm","Zero-click mobile spyware",5,"Taking over a phone without the victim doing anything.","2017–2020: Pegasus was installed on Catalan politicians' iPhones, partly through zero-click iMessage exploits; at least 65 people were targeted.","Lockdown mode for high-risk staff, rapid OS updates, regular reboots.","T1203","https://citizenlab.ca/2022/04/catalangate-extensive-mercenary-spyware-operation-against-catalans-using-pegasus-candiru/","eu"],
+ ["Bk","Firmware rootkit",5,"Implant in the boot firmware that survives reinstalling the OS and replacing the disk.","2018: ESET found LoJax, the first UEFI rootkit seen in the wild, on government systems in the Balkans and Central and Eastern Europe.","Secure Boot, firmware integrity checks, firmware updates.","T1542.001","https://www.helpnetsecurity.com/2018/09/27/uefi-rootkit/","eu"],
+ ["Ot","Industrial sabotage",5,"Attacks that manipulate physical processes through OT/ICS systems.","2016: Industroyer opened breakers at a Kyiv substation, cutting power to part of the city for about an hour.","IT/OT segmentation, OT monitoring, manual fallback procedures.","T0831","https://www.darkreading.com/threat-intelligence/first-malware-designed-solely-for-electric-grids-caused-2016-ukraine-outage/d/d-id/1329114","eu"]
+]
+};
+const ROWS = [
+ ["ai",[
+  ["Jb","Jailbreak",1,"Prompts that get a model to ignore its rules.","2024: a customer got DPD's UK support chatbot to ignore its rules, swear and criticise DPD; the AI element was switched off.","Layered output filtering, don't rely on the model alone for policy.","AML.T0054","https://techinformed.com/dpd-disables-sweary-ai-chatbot/","eu"],
+  ["Pi","Prompt injection",2,"Hidden instructions in content an AI reads, hijacking what it does.","2023: CISPA researchers in Saarbrücken showed hidden text on web pages could turn Bing Chat into a social engineer that extracts personal data.","Treat model input as untrusted, separate data from instructions, limit tool access.","AML.T0051","https://techxplore.com/news/2023-03-indirect-prompt-upend-chatbots.html","eu-res"],
+  ["Ag","AI agent hijacking",3,"Turning an AI assistant with tool access into an exfiltration channel.","2025: EchoLeak showed one crafted email could make Microsoft 365 Copilot leak internal data without any click.","Least privilege for agents, human approval for side effects, egress controls.","AML.T0051.001","https://thehackernews.com/2025/06/zero-click-ai-vulnerability-exposes.html","global"],
+  ["Mv","Malicious model files",3,"Model files that run code when loaded.","2024: JFrog found about 100 malicious models on Hugging Face that could run code on the machine loading them.","Safe formats like safetensors, scan and sandbox model loading.","AML.T0010","https://www.bleepingcomputer.com/news/security/malicious-ai-models-on-hugging-face-backdoor-users-machines/amp/","global"],
+  ["Ae","Adversarial examples",3,"Inputs crafted to make a model misclassify.","2019: KU Leuven researchers printed a patch that made people holding it invisible to a YOLO person detector.","Adversarial training, input sanity checks, human review for critical calls.","AML.T0043","https://techxplore.com/news/2019-04-adversarial-patch-ai.html","eu-res"],
+  ["Me","Model extraction",3,"Querying a model's API to steal its parameters or behaviour.","2024: a team including ETH Zurich researchers recovered part of OpenAI production models through the API for under $20.","Rate limits, query monitoring, output rounding.","AML.T0024.002","https://proceedings.mlr.press/v235/carlini24a.html","eu-res"],
+  ["Dp","Data poisoning",4,"Corrupting training data to plant backdoors or degrade a model.","2023: a team including ETH Zurich showed $60 of expired domains could have poisoned 0.01% of LAION-400M, a dataset from Germany's LAION.","Dataset provenance, integrity hashes, anomaly detection on training data.","AML.T0020","https://www.research-collection.ethz.ch/items/5e3ee588-49e1-452c-8a66-2319bdf36689","eu-res"]
+ ]],
+ ["phy",[
+  ["Tg","Tailgating",1,"Following an authorised person through a secured door.","UK firm Claranet's testers tailgated staff into a client's data centre during an authorised physical test.","Turnstiles, one badge per person, a culture of challenging strangers.","—","https://claranet.com/uk/blog/how-many-disguises-would-you-pack-to-break-data-centre","eu-res"],
+  ["Ud","Infected USB drives",1,"Malware that spreads when someone plugs in a removable drive.","2022: the Raspberry Robin worm, spread through infected USB drives, hit telecom and government networks in Europe and elsewhere.","Disable autorun, block unknown USB storage.","T1091","https://www.darkreading.com/attacks-breaches/raspberry-robin-worm-targets-telcos-governments","eu"],
+  ["Et","Rogue Wi-Fi",2,"A fake or attacker-controlled access point near the target to capture logins.","2018: Dutch intelligence caught GRU officers beside the OPCW in The Hague with a car full of Wi-Fi hacking gear aimed at its network.","WPA3-Enterprise with certificate checks, VPN on public networks, wireless monitoring.","T1557.004","https://www.dutchnews.nl/news/2018/10/russian-attempt-to-hack-chemical-weapons-watchdog-in-the-hague-thwarted/","eu"],
+  ["Rf","Badge cloning",2,"Copying RFID access cards from a short distance.","2008: Radboud University Nijmegen showed Mifare Classic cards, about a billion in use including building badges, could be cloned.","Modern encrypted cards, PIN plus badge for sensitive areas.","—","https://www.sos.cs.ru.nl/applications/rfid/pressrelease.en.html","eu-res"],
+  ["Bl","Bluetooth exploit",3,"Attacking devices over Bluetooth from nearby.","2019: the KNOB attack, by researchers from CISPA, Oxford and SUTD, forced Bluetooth encryption keys down to one byte.","Patch firmware, turn Bluetooth off when unused.","—","https://www.usenix.org/conference/usenixsecurity19/presentation/antonioli","eu-res"],
+  ["Hi","Hardware implant",5,"Malicious chips or cables added to devices.","2013: Der Spiegel published the NSA's ANT catalogue of implants such as COTTONMOUTH, a USB plug with a hidden radio.","Trusted suppliers, tamper-evident seals, hardware inspection.","T1200","https://en.wikipedia.org/wiki/ANT_catalog","eu-res"],
+  ["Sc","Side-channel attack",5,"Leaking secrets through timing, power or CPU behaviour.","2018: TU Graz researchers played a central role in discovering Meltdown and Spectre, which affected most modern processors.","Microcode and OS patches, isolate sensitive workloads.","CVE-2017-5753","https://tugraz.at/en/tu-graz/services/news-stories/tu-graz-news/singleview/article/tu-graz-researchers-discover-serious-security-vulnerabilities","eu-res"]
+ ]]
+];
+const COLS = ["soc","cred","mal","web","net","sup","imp","lat","adv"];
+const LV = ["hsl(190 45% var(--l1))","hsl(160 40% var(--l2))","hsl(45 70% var(--l3))","hsl(18 65% var(--l4))","hsl(345 55% var(--l5))"];
+const LVNAME = ["Opportunistic","Low","Moderate","Advanced","State-level"];
+const SCOPE = {eu:"European incident","eu-res":"European research or disclosure",global:"Global case; no well-documented European case found"};
+
+const table = document.getElementById("table");
+const below = document.getElementById("below");
+const els = [];
+// build ordered element list, numbered in reading order like the real table
+const heights = COLS.map(c=>D[c].length);
+const grid = []; // [row][col]
+COLS.forEach((c,ci)=>{const off=7-D[c].length;D[c].forEach((e,ri)=>{(grid[off+ri] ||= [])[ci]=[c,e];});});
+let n=0;
+grid.forEach((row,r)=>row && row.forEach((cell,ci)=>{ if(cell){ els.push(mk(cell[0],cell[1],++n,r+2,ci+1)); }}));
+ROWS.forEach(([c,list],ri)=>list.forEach((e,i)=>els.push(mk(c,e,++n,10+ri,i+2))));
+
+function mk(fam,e,num,row,col){return {fam,sym:e[0],name:e[1],lvl:e[2],what:e[3],ex:e[4],def:e[5],ref:e[6],url:e[7],scope:e[8],num,row,col};}
+
+// column headings (row 1)
+COLS.forEach((c,ci)=>{const h=document.createElement("div");h.className="colhead";h.style.cssText=`grid-row:1;grid-column:${ci+1};--h:${FAM[c].h}`;h.textContent=FAM[c].n;table.appendChild(h);});
+
+// inset
+const inset=document.createElement("div");inset.className="inset";inset.setAttribute("aria-live","polite");table.appendChild(inset);
+const inset2=document.createElement("div");inset2.className="inset";below.appendChild(inset2);
+
+// tiles
+els.forEach(el=>{
+  const b=document.createElement("button");b.type="button";b.className="tile";
+  b.style.cssText=`grid-row:${el.row};grid-column:${el.col};--h:${FAM[el.fam].h};--lv:${LV[el.lvl-1]}`;
+  b.setAttribute("aria-pressed","false");
+  b.setAttribute("aria-label",`${el.num}, ${el.name}, ${FAM[el.fam].n}, sophistication ${el.lvl} of 5`);
+  b.innerHTML=`<span class="num">${el.num}</span><span class="dots" aria-hidden="true">${[1,2,3,4,5].map(i=>`<i class="${i<=el.lvl?'on':''}"></i>`).join("")}</span><span class="sym">${el.sym}</span><span class="nm">${el.name}</span>`;
+  b.addEventListener("click",()=>select(el,b));
+  el.btn=b;table.appendChild(b);
+});
+// gap + detached row labels
+const g=document.createElement("div");g.className="gap";g.style.gridRow="9";table.appendChild(g);
+ROWS.forEach(([c],ri)=>{const l=document.createElement("div");l.className="rowlabel";l.style.cssText=`grid-row:${10+ri};grid-column:1`;l.textContent=FAM[c].n;table.appendChild(l);});
+
+function render(el){
+  if(!el){return `<p class="hint">Select an element to see what the attack is, a sourced European case and the main defences.</p>`;}
+  return `<div class="big" style="--h:${FAM[el.fam].h};--lv:${LV[el.lvl-1]}"><span class="num">${el.num}</span><span class="sym">${el.sym}</span><span class="lvl">Level ${el.lvl} of 5</span></div>
+  <div class="info"><h2>${el.name}</h2><p class="cat">${FAM[el.fam].n}, ${LVNAME[el.lvl-1].toLowerCase()} sophistication</p>
+  <p>${el.what}</p><p><span class="scope s-${el.scope}">${SCOPE[el.scope]}</span></p><p><b>Case:</b> ${el.ex} <a href="${el.url}" target="_blank" rel="noopener noreferrer">Source</a></p><p><b>Defend:</b> ${el.def}</p><p class="ref">Reference: ${el.ref}</p></div>`;
+}
+let current=null;
+function select(el,b){
+  if(current) current.btn.setAttribute("aria-pressed","false");
+  current=el;b.setAttribute("aria-pressed","true");
+  inset.innerHTML=render(el);inset2.innerHTML=render(el);
+  if(window.matchMedia("(max-width:820px)").matches) below.scrollIntoView({behavior:"smooth",block:"nearest"});
+}
+inset.innerHTML=render(null);inset2.innerHTML=render(null);
+
+// lightness tokens for level colouring (theme-aware)
+function setLevelTokens(){
+  const dark = document.documentElement.dataset.theme==="dark" || (document.documentElement.dataset.theme!=="light" && matchMedia("(prefers-color-scheme: dark)").matches);
+  const ls = dark ? [24,26,26,28,30] : [88,82,76,72,70];
+  ls.forEach((l,i)=>document.documentElement.style.setProperty(`--l${i+1}`,l+"%"));
+}
+setLevelTokens();matchMedia("(prefers-color-scheme: dark)").addEventListener("change",setLevelTokens);
+document.getElementById("scalebar").innerHTML=LV.map(c=>`<span style="background:${c}"></span>`).join("");
+
+// colour mode
+const app=document.getElementById("app");
+document.querySelectorAll(".seg button").forEach(btn=>btn.addEventListener("click",()=>{
+  document.querySelectorAll(".seg button").forEach(x=>x.setAttribute("aria-pressed",String(x===btn)));
+  const lv=btn.dataset.mode==="level";
+  table.classList.toggle("by-level",lv);below.classList.toggle("by-level",lv);app.classList.toggle("by-level-on",lv);
+  if(lv) setFamily(null);
+}));
+
+// legend filter
+const legend=document.getElementById("legend");let famSel=null;
+Object.entries(FAM).forEach(([k,f])=>{
+  const b=document.createElement("button");b.type="button";b.style.setProperty("--h",f.h);b.dataset.fam=k;b.setAttribute("aria-pressed","false");
+  b.innerHTML=`<span class="sw"></span>${f.n}`;b.addEventListener("click",()=>setFamily(famSel===k?null:k));legend.appendChild(b);
+});
+function setFamily(k){famSel=k;legend.querySelectorAll("button").forEach(b=>b.setAttribute("aria-pressed",String(b.dataset.fam===k)));applyFilter();}
+
+// search
+const search=document.querySelector(".search");
+search.addEventListener("input",applyFilter);
+function applyFilter(){
+  const q=search.value.trim().toLowerCase();
+  const active=!!q||!!famSel;
+  table.classList.toggle("dim",active);
+  els.forEach(el=>{
+    const okF=!famSel||el.fam===famSel;
+    const okQ=!q||[el.name,el.sym,el.what,el.ex,FAM[el.fam].n].join(" ").toLowerCase().includes(q);
+    el.btn.classList.toggle("match",okF&&okQ);
+  });
+}
+</script>
+</body>
+</html>
