@@ -6,20 +6,24 @@
 
 An interactive "periodic table" of cyber attack techniques, each with a sourced European case and defences, plus a framework for running tabletop exercises with it.
 
+**Live site: https://theshellcompany.github.io/periodictableofcyberattacks/**
+
 Everything is plain HTML, CSS and JavaScript. There is no build step and nothing to install.
 
 ## Contents
 
 | File | What it is |
 |------|------------|
-| `periodic-table-cyber-attacks.html` | The Periodic Table of Cyber Attacks: attack techniques grouped by family and sophistication, each with a sourced European case and defences |
+| `index.html` | The Periodic Table of Cyber Attacks: attack techniques grouped by family and sophistication, each with a sourced European case and defences |
 | `periodic-table-cyber-attacks-tabletop.md` | Tabletop exercise framework that uses the attack table as its scenario source |
 | `assets/logo.svg` | Project logo |
+| `periodic-table-cyber-attacks.html` | Redirect to `index.html`, so old links keep working |
+| `_config.yml` | GitHub Pages settings (renders the tabletop guide as a web page) |
 
 ## Quick start
 
 1. Clone or download the repository.
-2. Open `periodic-table-cyber-attacks.html` in a modern browser.
+2. Open `index.html` in a modern browser, or use the live site above.
 3. Select any tile to see its details.
 
 The page loads fonts from Google Fonts. Offline, it falls back to system fonts and works the same way.
@@ -57,7 +61,7 @@ Every case is labelled as one of:
 
 ## Tabletop exercise framework
 
-`periodic-table-cyber-attacks-tabletop.md` turns the attack table into a ready-to-run exercise kit:
+`periodic-table-cyber-attacks-tabletop.md` ([read it on the site](https://theshellcompany.github.io/periodictableofcyberattacks/periodic-table-cyber-attacks-tabletop.html)) turns the attack table into a ready-to-run exercise kit:
 
 - **Four ways to pick scenarios**: random attack draw, family deep dive, defence gap analysis, sophistication escalation.
 - **Three templates**: attack chain simulation (60–90 min), sophistication escalation (45 min), defence validation (30 min).
@@ -67,7 +71,7 @@ Every case is labelled as one of:
 
 ## Editing the data
 
-All content lives in plain JavaScript arrays inside the HTML file. Main columns are in `const D = { … }` and detached rows in `const ROWS = [ … ]`. Each element is:
+All content lives in plain JavaScript arrays inside `index.html`. Main columns are in `const D = { … }` and detached rows in `const ROWS = [ … ]`. Each element is:
 
 ```js
 ["Sym", "Name", level, "What it is", "Case", "Defences", "Reference ID", "Source URL", "scope"]

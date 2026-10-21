@@ -1,0 +1,5 @@
+title: The Periodic Table of Cyber Attacks
+description: Cyber attack techniques by family and sophistication, each with a sourced European case and defences.
+theme: jekyll-theme-primer
+exclude:
+  - LICENSE.md

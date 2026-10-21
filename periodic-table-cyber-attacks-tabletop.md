@@ -8,7 +8,7 @@
 
 This framework uses the Periodic Table of Cyber Attacks as a **structured, visual, and realistic** starting point for cybersecurity tabletop exercises. The table's organization by attack families and sophistication levels provides a natural progression for exercises, while the European case studies and defense recommendations ground discussions in real-world scenarios.
 
-**Original Table**: `periodic-table-cyber-attacks.html`  
+**Interactive table**: [The Periodic Table of Cyber Attacks](./index.html)  
 
 ---
 
@@ -689,8 +689,8 @@ Use this guide to quickly select exercises based on team focus.
 ## 10. Resources
 
 ### Original Materials
-- [Periodic Table of Cyber Attacks (Original)](./periodic-table-cyber-attacks.html)
-- [Periodic Table of Cyber Attacks (Extended v2)](./periodic-table-cyber-attacks-v2.html)
+- [The Periodic Table of Cyber Attacks](./index.html)
+- [Source on GitHub](https://github.com/theshellcompany/PeriodicTableOfCyberAttacks)
 
 ### Referenced Frameworks
 - **MITRE ATT&CK**: [attack.mitre.org](https://attack.mitre.org) - For detailed attack techniques
